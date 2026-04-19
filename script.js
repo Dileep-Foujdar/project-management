@@ -1,106 +1,107 @@
-// ---------- STORAGE KEYS ----------
-const STORAGE_USERS = "teamflow_users";
-const STORAGE_TASKS = "teamflow_tasks";
-const STORAGE_MESSAGES = "teamflow_messages";
+// STORAGE KEYS
+const STORAGE_USERS = "teampulse_users";
+const STORAGE_TASKS = "teampulse_tasks";
+const STORAGE_MESSAGES = "teampulse_messages";
 
-// Global state
-let currentUser = null; // { name, role }
-let allUsers = []; // array of { name, role }
+let currentUser = null;
+let allUsers = [];
 let tasks = [];
 let messages = [];
-let activeView = "tasks"; // 'tasks' or 'chat'
+let activeView = "tasks";
 
-// DOM elements
+// DOM
 const loginContainer = document.getElementById("loginContainer");
 const mainApp = document.getElementById("mainApp");
-const loginNameInput = document.getElementById("loginName");
-const loginRoleSelect = document.getElementById("loginRole");
+const loginName = document.getElementById("loginName");
+const loginRole = document.getElementById("loginRole");
 const loginBtn = document.getElementById("loginBtn");
-const loginErrorDiv = document.getElementById("loginError");
+const loginError = document.getElementById("loginError");
 const sidebarUserName = document.getElementById("sidebarUserName");
 const sidebarUserRole = document.getElementById("sidebarUserRole");
-const logoutBtnSidebar = document.getElementById("logoutBtnSidebar");
+const logoutBtn = document.getElementById("logoutBtnSidebar");
 const tasksViewDiv = document.getElementById("tasksView");
 const chatViewDiv = document.getElementById("chatView");
+const teamViewDiv = document.getElementById("teamView");
+const teamNavBtn = document.getElementById("teamNavBtn");
 const chatMessagesList = document.getElementById("chatMessagesList");
 const chatMsgInput = document.getElementById("chatMsgInput");
-const sendChatMsgBtn = document.getElementById("sendChatMsgBtn");
+const sendChatBtn = document.getElementById("sendChatBtn");
 const profileAvatar = document.getElementById("profileAvatar");
 
-// ---------- HELPER: INITIAL SEED DATA (if localStorage empty) ----------
-function seedInitialData() {
-  // Users (demo)
+// ---------- DATA INIT ----------
+function seedData() {
   if (!localStorage.getItem(STORAGE_USERS)) {
-    const demoUsers = [
-      { name: "Alex Morgan", role: "Project Manager" },
-      { name: "Jamie Chen", role: "Team Member" },
-      { name: "Taylor Reed", role: "Team Member" },
-    ];
-    localStorage.setItem(STORAGE_USERS, JSON.stringify(demoUsers));
+    localStorage.setItem(
+      STORAGE_USERS,
+      JSON.stringify([
+        { name: "Alex Boss", role: "Project Manager" },
+        { name: "Emma Dev", role: "Developer" },
+        { name: "Lisa Design", role: "Designer" },
+        { name: "John Writer", role: "Content Writer" },
+      ]),
+    );
   }
-  // Tasks
   if (!localStorage.getItem(STORAGE_TASKS)) {
-    const demoTasks = [
-      {
-        id: Date.now() + 1,
-        title: "Design Dashboard UI",
-        description: "Create wireframes & glassmorphism components",
-        deadline: "2025-05-20",
-        assignedTo: "Jamie Chen",
-        status: "In Progress",
-        createdBy: "Alex Morgan",
-      },
-      {
-        id: Date.now() + 2,
-        title: "Setup localStorage logic",
-        description: "Implement persistence and modular JS",
-        deadline: "2025-05-18",
-        assignedTo: "Taylor Reed",
-        status: "Pending",
-        createdBy: "Alex Morgan",
-      },
-      {
-        id: Date.now() + 3,
-        title: "Review final deliverables",
-        description: "Check all features before launch",
-        deadline: "2025-05-25",
-        assignedTo: "Alex Morgan",
-        status: "Pending",
-        createdBy: "Alex Morgan",
-      },
-    ];
-    localStorage.setItem(STORAGE_TASKS, JSON.stringify(demoTasks));
+    localStorage.setItem(
+      STORAGE_TASKS,
+      JSON.stringify([
+        {
+          id: Date.now() + 1,
+          title: "Build Dashboard UI",
+          description: "Responsive layout",
+          estimatedHours: 8,
+          assignedTo: "Emma Dev",
+          progress: 45,
+          status: "In Progress",
+          priority: "High",
+          createdBy: "Alex Boss",
+        },
+        {
+          id: Date.now() + 2,
+          title: "Create Brand Assets",
+          description: "Logo & illustrations",
+          estimatedHours: 6,
+          assignedTo: "Lisa Design",
+          progress: 20,
+          status: "Pending",
+          priority: "Medium",
+          createdBy: "Alex Boss",
+        },
+        {
+          id: Date.now() + 3,
+          title: "Write Blog Post",
+          description: "Product launch",
+          estimatedHours: 3,
+          assignedTo: "John Writer",
+          progress: 0,
+          status: "Pending",
+          priority: "Low",
+          createdBy: "Alex Boss",
+        },
+      ]),
+    );
   }
-  // Messages
   if (!localStorage.getItem(STORAGE_MESSAGES)) {
-    const demoMessages = [
-      {
-        id: Date.now() + 100,
-        senderName: "Alex Morgan",
-        senderRole: "Project Manager",
-        text: "Welcome to TeamFlow! Use the chat to collaborate 🚀",
-        timestamp: Date.now() - 3600000,
-      },
-      {
-        id: Date.now() + 101,
-        senderName: "Jamie Chen",
-        senderRole: "Team Member",
-        text: "Got it! Let's finish tasks on time 💪",
-        timestamp: Date.now() - 1800000,
-      },
-    ];
-    localStorage.setItem(STORAGE_MESSAGES, JSON.stringify(demoMessages));
+    localStorage.setItem(
+      STORAGE_MESSAGES,
+      JSON.stringify([
+        {
+          id: Date.now() + 100,
+          senderName: "Alex Boss",
+          senderRole: "Project Manager",
+          text: "Welcome to TeamPulse! 🚀",
+          timestamp: Date.now() - 3600000,
+        },
+      ]),
+    );
   }
 }
 
-// Load all data from localStorage into global arrays
-function loadAllData() {
+function loadData() {
   allUsers = JSON.parse(localStorage.getItem(STORAGE_USERS) || "[]");
   tasks = JSON.parse(localStorage.getItem(STORAGE_TASKS) || "[]");
   messages = JSON.parse(localStorage.getItem(STORAGE_MESSAGES) || "[]");
 }
-
-// Save tasks & messages to localStorage (users are updated on login)
 function persistTasks() {
   localStorage.setItem(STORAGE_TASKS, JSON.stringify(tasks));
 }
@@ -111,171 +112,215 @@ function persistUsers() {
   localStorage.setItem(STORAGE_USERS, JSON.stringify(allUsers));
 }
 
-// ---------- AUTHENTICATION ----------
+// AUTH
 function loginUser(name, role) {
   if (!name.trim()) {
-    loginErrorDiv.innerText = "Please enter your name.";
+    loginError.innerText = "Enter your name";
     return false;
   }
-  const existingUserIndex = allUsers.findIndex(
+  const idx = allUsers.findIndex(
     (u) => u.name.toLowerCase() === name.trim().toLowerCase(),
   );
-  if (existingUserIndex !== -1) {
-    // update role if changed
-    allUsers[existingUserIndex].role = role;
-  } else {
-    allUsers.push({ name: name.trim(), role: role });
-  }
+  if (idx !== -1) allUsers[idx].role = role;
+  else allUsers.push({ name: name.trim(), role });
   persistUsers();
-  currentUser = { name: name.trim(), role: role };
-  // store session in sessionStorage for page refresh persistence (optional)
+  currentUser = { name: name.trim(), role };
   sessionStorage.setItem("currentUser", JSON.stringify(currentUser));
   return true;
 }
-
 function logout() {
   currentUser = null;
   sessionStorage.removeItem("currentUser");
   loginContainer.style.display = "flex";
   mainApp.style.display = "none";
-  // reset views
-  activeView = "tasks";
 }
-
 function checkAutoLogin() {
   const saved = sessionStorage.getItem("currentUser");
   if (saved) {
-    try {
-      const user = JSON.parse(saved);
-      if (user && user.name) {
-        currentUser = user;
-        loadAllData();
-        // ensure user exists in allUsers sync
-        if (!allUsers.find((u) => u.name === currentUser.name)) {
-          allUsers.push(currentUser);
-          persistUsers();
-        }
-        loginContainer.style.display = "none";
-        mainApp.style.display = "block";
-        renderUI();
-        return true;
-      }
-    } catch (e) {}
+    currentUser = JSON.parse(saved);
+    loadData();
+    loginContainer.style.display = "none";
+    mainApp.style.display = "block";
+    renderUI();
+    return true;
   }
   return false;
 }
 
-// ---------- TASKS LOGIC (Manager vs Employee) ----------
-function addTask(title, description, deadline, assignedTo) {
-  if (!title.trim()) return false;
-  const newTask = {
-    id: Date.now(),
-    title: title.trim(),
-    description: description.trim() || "",
-    deadline: deadline,
-    assignedTo: assignedTo,
-    status: "Pending",
-    createdBy: currentUser.name,
-  };
-  tasks.push(newTask);
-  persistTasks();
+// TEAM MANAGEMENT (BOSS ONLY)
+function renderTeamPanel() {
+  const container = document.getElementById("memberListContainer");
+  if (!container) return;
+  if (allUsers.length === 0) {
+    container.innerHTML = "<div class='empty-state'>No members</div>";
+    return;
+  }
+  let html = "";
+  allUsers.forEach((user) => {
+    html += `
+        <div class="member-item">
+          <span><strong>${escapeHtml(user.name)}</strong> (${user.role})</span>
+          ${user.name !== currentUser.name ? `<button class="remove-member-btn" data-name="${escapeHtml(user.name)}">Remove</button>` : "<span>👑 You</span>"}
+        </div>
+      `;
+  });
+  container.innerHTML = html;
+  document.querySelectorAll(".remove-member-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const name = btn.dataset.name;
+      if (confirm(`Remove ${name}?`)) {
+        allUsers = allUsers.filter((u) => u.name !== name);
+        persistUsers();
+        renderTeamPanel();
+        renderTasksView(); // update assign dropdown
+      }
+    });
+  });
+}
+
+function addMember(name, role) {
+  if (!name.trim()) return false;
+  if (
+    allUsers.some((u) => u.name.toLowerCase() === name.trim().toLowerCase())
+  ) {
+    alert("User exists");
+    return false;
+  }
+  allUsers.push({ name: name.trim(), role });
+  persistUsers();
+  renderTeamPanel();
   renderTasksView();
   return true;
 }
 
-function updateTaskStatus(taskId, newStatus) {
-  const task = tasks.find((t) => t.id === taskId);
-  if (task) {
-    task.status = newStatus;
+// TASKS: BOSS creates task with estimated hours, MEMBER updates progress %
+function addTask(title, desc, estimatedHours, assignedTo, priority) {
+  if (!title.trim()) return false;
+  tasks.push({
+    id: Date.now(),
+    title: title.trim(),
+    description: desc.trim() || "",
+    estimatedHours: parseFloat(estimatedHours) || 0,
+    assignedTo,
+    progress: 0,
+    status: "Pending",
+    priority: priority || "Medium",
+    createdBy: currentUser.name,
+  });
+  persistTasks();
+  renderTasksView();
+  return true;
+}
+function updateProgress(taskId, newProgress) {
+  const t = tasks.find((t) => t.id === taskId);
+  if (t) {
+    t.progress = Math.min(100, Math.max(0, parseFloat(newProgress)));
+    t.status =
+      t.progress >= 100
+        ? "Completed"
+        : t.progress > 0
+          ? "In Progress"
+          : "Pending";
     persistTasks();
     renderTasksView();
   }
 }
-
-function editTask(taskId, updatedData) {
-  const task = tasks.find((t) => t.id === taskId);
-  if (task) {
-    Object.assign(task, updatedData);
+function editTask(taskId, updates) {
+  const t = tasks.find((t) => t.id === taskId);
+  if (t) {
+    Object.assign(t, updates);
     persistTasks();
     renderTasksView();
   }
 }
-
 function deleteTask(taskId) {
   tasks = tasks.filter((t) => t.id !== taskId);
   persistTasks();
   renderTasksView();
 }
 
-// ---------- RENDER TASKS VIEW (Role Based) ----------
+// RENDER TASKS (BOSS vs MEMBER)
 function renderTasksView() {
   if (!tasksViewDiv) return;
   const isManager = currentUser.role === "Project Manager";
-  let html = `<div class="dashboard-header"><h2>📌 Task Dashboard</h2></div>`;
+  let html = `<div><h2>📋 Task Board</h2></div>`;
 
-  // Manager: create task form + all tasks | Employee: only assigned tasks
+  // stats
+  const myTasks = isManager
+    ? tasks
+    : tasks.filter((t) => t.assignedTo === currentUser.name);
+  const avgProgress = myTasks.length
+    ? Math.round(myTasks.reduce((s, t) => s + t.progress, 0) / myTasks.length)
+    : 0;
+  html += `
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-number">${myTasks.length}</div><div>My Tasks</div></div>
+        <div class="stat-card"><div class="stat-number">${avgProgress}%</div><div>Avg Progress</div></div>
+        <div class="stat-card"><div class="stat-number">${myTasks.filter((t) => t.status === "Completed").length}</div><div>Completed</div></div>
+      </div>
+    `;
+
+  // Create task form (boss only)
   if (isManager) {
-    // Get list of team members (role = Team Member) + manager itself can assign to anyone
     const teamMembers = allUsers
-      .filter((u) => u.role === "Team Member")
+      .filter((u) => u.role !== "Project Manager")
       .map((u) => u.name);
-    const assignOptions = [...teamMembers, currentUser.name].filter(
-      (v, i, a) => a.indexOf(v) === i,
-    );
+    const assignOptions = [...new Set([...teamMembers, currentUser.name])];
     html += `
         <div class="card-panel">
-          <h3>➕ Create New Task</h3>
+          <h3>➕ Assign New Task</h3>
           <div class="form-grid">
-            <input type="text" id="taskTitle" placeholder="Task title" autocomplete="off">
-            <input type="text" id="taskDesc" placeholder="Description (optional)">
-            <input type="date" id="taskDeadline">
-            <select id="taskAssignTo">
-              ${assignOptions.map((name) => `<option value="${name}">${name}</option>`).join("")}
-            </select>
+            <input type="text" id="taskTitle" placeholder="Title">
+            <input type="text" id="taskDesc" placeholder="Description">
+            <input type="number" id="taskHours" placeholder="Est. hours" step="0.5">
+            <select id="taskAssignTo">${assignOptions.map((n) => `<option value="${n}">${n}</option>`).join("")}</select>
+            <select id="taskPriority"><option value="Low">🟢 Low</option><option value="Medium">🟡 Medium</option><option value="High">🔴 High</option></select>
             <button id="createTaskBtn" class="primary">Create Task</button>
           </div>
         </div>
       `;
   }
 
-  // Filter tasks based on role
-  let filteredTasks = [];
-  if (isManager) {
-    filteredTasks = [...tasks];
-  } else {
-    filteredTasks = tasks.filter((t) => t.assignedTo === currentUser.name);
-  }
-
-  if (filteredTasks.length === 0) {
-    html += `<div class="card-panel"><div class="empty-state">✨ No tasks ${!isManager ? "assigned to you" : "available"}. ✨</div></div>`;
+  let filtered = isManager
+    ? [...tasks]
+    : tasks.filter((t) => t.assignedTo === currentUser.name);
+  if (filtered.length === 0) {
+    html += `<div class="card-panel"><div class="empty-state">✨ No tasks yet ✨</div></div>`;
   } else {
     html += `<div class="tasks-grid">`;
-    filteredTasks.forEach((task) => {
-      const statusClass = `status-${task.status.replace(/ /g, "-")}`;
+    filtered.forEach((task) => {
+      const priorityClass = `priority-${task.priority}`;
+      const borderColor =
+        task.progress >= 100
+          ? "#2ecc71"
+          : task.progress > 0
+            ? "#facc15"
+            : "#e74c3c";
       html += `
-          <div class="task-card" style="border-left-color: ${task.status === "Completed" ? "#2ecc71" : task.status === "In Progress" ? "#facc15" : "#e74c3c"}">
-            <div class="task-header">
+          <div class="task-card" style="border-left-color: ${borderColor};">
+            <div class="task-header" style="display:flex; justify-content:space-between; flex-wrap:wrap;">
               <strong>${escapeHtml(task.title)}</strong>
-              <span class="status-badge ${statusClass}">${task.status}</span>
+              <span style="background:#eef2ff; padding:2px 8px; border-radius:20px; font-size:0.7rem;">${task.priority}</span>
             </div>
-            <div style="font-size:0.85rem; margin: 6px 0;">📝 ${escapeHtml(task.description || "—")}</div>
-            <div style="font-size:0.75rem; color:#475569;">📅 Deadline: ${task.deadline || "No deadline"} | 👤 Assigned to: ${task.assignedTo}</div>
-            <div class="task-actions" style="margin-top: 12px;">
+            <div style="font-size:0.8rem;">📝 ${escapeHtml(task.description || "—")}</div>
+            <div style="font-size:0.75rem; margin:4px 0;">⏱️ Est: ${task.estimatedHours} hrs | 👤 ${task.assignedTo}</div>
+            <div class="progress-bar"><div class="progress-fill" style="width: ${task.progress}%;"></div></div>
+            <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap;">
+              <span>📊 ${task.progress}% complete</span>
         `;
-      // Employee view: status update dropdown
-      if (!isManager) {
+      if (!isManager && task.assignedTo === currentUser.name) {
         html += `
-            <select class="status-update" data-id="${task.id}">
-              <option value="Pending" ${task.status === "Pending" ? "selected" : ""}>⏳ Pending</option>
-              <option value="In Progress" ${task.status === "In Progress" ? "selected" : ""}>⚙️ In Progress</option>
-              <option value="Completed" ${task.status === "Completed" ? "selected" : ""}>✅ Completed</option>
-            </select>
+            <div style="display:flex; gap:6px;">
+              <input type="number" id="progress-${task.id}" value="${task.progress}" min="0" max="100" step="5" style="width:70px; padding:4px; border-radius:20px;">
+              <button class="update-progress-btn" data-id="${task.id}" style="background:#0f172a; color:white; border:none; padding:4px 12px; border-radius:20px;">Update %</button>
+            </div>
           `;
-      } else {
-        // Manager: edit & delete buttons + inline edit form (simplified)
+      } else if (isManager) {
         html += `
-            <button class="edit-task-btn" data-id="${task.id}" data-title="${escapeHtml(task.title)}" data-desc="${escapeHtml(task.description)}" data-deadline="${task.deadline || ""}" data-assigned="${task.assignedTo}">✏️ Edit</button>
-            <button class="delete-task-btn" data-id="${task.id}">🗑️ Delete</button>
+            <div>
+              <button class="edit-task-btn" data-id="${task.id}" data-title="${escapeHtml(task.title)}" data-desc="${escapeHtml(task.description)}" data-hours="${task.estimatedHours}" data-assigned="${task.assignedTo}" data-priority="${task.priority}">✏️ Edit</button>
+              <button class="delete-task-btn" data-id="${task.id}">🗑️ Delete</button>
+            </div>
           `;
       }
       html += `</div></div>`;
@@ -284,184 +329,148 @@ function renderTasksView() {
   }
   tasksViewDiv.innerHTML = html;
 
-  // Attach event listeners dynamically
+  // attach events
   if (isManager) {
     document.getElementById("createTaskBtn")?.addEventListener("click", () => {
       const title = document.getElementById("taskTitle").value;
       const desc = document.getElementById("taskDesc").value;
-      const deadline = document.getElementById("taskDeadline").value;
-      const assignTo = document.getElementById("taskAssignTo").value;
-      if (addTask(title, desc, deadline, assignTo)) {
+      const hours = document.getElementById("taskHours").value;
+      const assign = document.getElementById("taskAssignTo").value;
+      const priority = document.getElementById("taskPriority").value;
+      if (addTask(title, desc, hours, assign, priority)) {
         document.getElementById("taskTitle").value = "";
         document.getElementById("taskDesc").value = "";
-      } else alert("Task title required");
+        document.getElementById("taskHours").value = "";
+      } else alert("Title required");
     });
-    // Edit & delete listeners
     document.querySelectorAll(".edit-task-btn").forEach((btn) => {
       btn.addEventListener("click", () => {
         const id = parseInt(btn.dataset.id);
-        const oldTitle = btn.dataset.title;
-        const oldDesc = btn.dataset.desc;
-        const oldDeadline = btn.dataset.deadline;
-        const oldAssigned = btn.dataset.assigned;
-        const newTitle = prompt("Edit task title:", oldTitle);
+        const newTitle = prompt("New title", btn.dataset.title);
         if (newTitle && newTitle.trim()) {
-          const newDesc = prompt("Edit description:", oldDesc) || "";
-          const newDeadline =
-            prompt("Edit deadline (YYYY-MM-DD):", oldDeadline) || "";
-          const newAssigned = prompt("Assign to (name):", oldAssigned);
-          if (newAssigned) {
-            editTask(id, {
-              title: newTitle.trim(),
-              description: newDesc,
-              deadline: newDeadline,
-              assignedTo: newAssigned,
-            });
-          } else {
-            editTask(id, {
-              title: newTitle.trim(),
-              description: newDesc,
-              deadline: newDeadline,
-            });
-          }
+          const newDesc = prompt("Description", btn.dataset.desc) || "";
+          const newHours = parseFloat(prompt("Est. hours", btn.dataset.hours));
+          const newAssign = prompt("Assign to", btn.dataset.assigned);
+          const newPriority = prompt(
+            "Priority (Low/Medium/High)",
+            btn.dataset.priority,
+          );
+          const updates = { title: newTitle.trim(), description: newDesc };
+          if (!isNaN(newHours)) updates.estimatedHours = newHours;
+          if (newAssign) updates.assignedTo = newAssign;
+          if (newPriority && ["Low", "Medium", "High"].includes(newPriority))
+            updates.priority = newPriority;
+          editTask(id, updates);
         }
       });
     });
     document.querySelectorAll(".delete-task-btn").forEach((btn) => {
       btn.addEventListener("click", () => {
-        if (confirm("Delete this task permanently?"))
-          deleteTask(parseInt(btn.dataset.id));
+        if (confirm("Delete?")) deleteTask(parseInt(btn.dataset.id));
       });
     });
   } else {
-    // Employee status change
-    document.querySelectorAll(".status-update").forEach((select) => {
-      select.addEventListener("change", (e) => {
-        const taskId = parseInt(select.dataset.id);
-        updateTaskStatus(taskId, select.value);
+    document.querySelectorAll(".update-progress-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const id = parseInt(btn.dataset.id);
+        const progressInput = document.getElementById(`progress-${id}`);
+        if (progressInput) updateProgress(id, progressInput.value);
       });
     });
   }
 }
 
-// ---------- CHAT FUNCTIONALITY ----------
+// CHAT
 function renderChatView() {
   if (!chatMessagesList) return;
   if (messages.length === 0) {
-    chatMessagesList.innerHTML = `<div class="empty-state">💬 No messages yet. Start the conversation!</div>`;
+    chatMessagesList.innerHTML =
+      "<div class='empty-state'>💬 No messages</div>";
     return;
   }
   let html = "";
   messages.slice().forEach((msg) => {
-    html += `
-        <div class="chat-message">
-          <div class="message-meta">
-            <strong>${escapeHtml(msg.senderName)}</strong> (${msg.senderRole}) • ${new Date(msg.timestamp).toLocaleTimeString()}
-          </div>
-          <div>${escapeHtml(msg.text)}</div>
-        </div>
-      `;
+    html += `<div class="chat-message"><div class="message-meta"><strong>${escapeHtml(msg.senderName)}</strong> (${msg.senderRole}) • ${new Date(msg.timestamp).toLocaleTimeString()}</div><div>${escapeHtml(msg.text)}</div></div>`;
   });
   chatMessagesList.innerHTML = html;
   chatMessagesList.scrollTop = chatMessagesList.scrollHeight;
 }
-
-function sendChatMessage(text) {
-  if (!text.trim()) return;
-  const newMsg = {
+function sendChatMessage() {
+  const text = chatMsgInput.value.trim();
+  if (!text) return;
+  messages.push({
     id: Date.now(),
     senderName: currentUser.name,
     senderRole: currentUser.role,
-    text: text.trim(),
+    text,
     timestamp: Date.now(),
-  };
-  messages.push(newMsg);
+  });
   persistMessages();
   renderChatView();
   chatMsgInput.value = "";
 }
 
-// ---------- SWITCH VIEWS (Tasks / Chat) ----------
+// VIEW SWITCH
 function switchView(view) {
   activeView = view;
-  if (view === "tasks") {
-    tasksViewDiv.style.display = "block";
-    chatViewDiv.style.display = "none";
-    renderTasksView();
-  } else {
-    tasksViewDiv.style.display = "none";
-    chatViewDiv.style.display = "block";
-    renderChatView();
-  }
-  // Update nav active style
+  tasksViewDiv.style.display = view === "tasks" ? "block" : "none";
+  chatViewDiv.style.display = view === "chat" ? "block" : "none";
+  teamViewDiv.style.display = view === "team" ? "block" : "none";
   document.querySelectorAll(".nav-item").forEach((btn) => {
     if (btn.dataset.view === view) btn.classList.add("active");
     else btn.classList.remove("active");
   });
+  if (view === "tasks") renderTasksView();
+  if (view === "chat") renderChatView();
+  if (view === "team") renderTeamPanel();
 }
 
-// ---------- RENDER FULL UI (header, sidebar, initial view) ----------
 function renderUI() {
-  if (!currentUser) return;
   sidebarUserName.innerText = currentUser.name;
-  sidebarUserRole.innerText =
-    currentUser.role === "Project Manager" ? "👔 Manager" : "👩‍💻 Employee";
+  sidebarUserRole.innerText = currentUser.role;
   profileAvatar.innerText =
-    currentUser.role === "Project Manager" ? "👔" : "👩‍💻";
-  // Setup default view
+    currentUser.role === "Project Manager" ? "👔" : "👤";
+  teamNavBtn.style.display =
+    currentUser.role === "Project Manager" ? "flex" : "none";
   switchView("tasks");
 }
 
-// ---------- EVENT LISTENERS & INITIALIZATION ----------
-function initEventListeners() {
-  logoutBtnSidebar.addEventListener("click", () => {
-    logout();
-  });
-  sendChatMsgBtn.addEventListener("click", () =>
-    sendChatMessage(chatMsgInput.value),
-  );
-  chatMsgInput.addEventListener("keypress", (e) => {
-    if (e.key === "Enter") sendChatMessage(chatMsgInput.value);
-  });
-  document.querySelectorAll(".nav-item").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      switchView(btn.dataset.view);
-    });
-  });
-}
-
-// Helper escape
 function escapeHtml(str) {
-  if (!str) return "";
-  return str.replace(/[&<>]/g, function (m) {
-    if (m === "&") return "&amp;";
-    if (m === "<") return "&lt;";
-    if (m === ">") return "&gt;";
-    return m;
-  });
+  return str.replace(
+    /[&<>]/g,
+    (m) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" })[m],
+  );
 }
 
-// Startup
 function bootstrap() {
-  seedInitialData();
-  loadAllData();
-  initEventListeners();
-  if (checkAutoLogin()) {
-    renderUI();
-  } else {
-    loginContainer.style.display = "flex";
-    mainApp.style.display = "none";
-  }
+  seedData();
+  loadData();
+  if (checkAutoLogin()) renderUI();
   loginBtn.addEventListener("click", () => {
-    const name = loginNameInput.value.trim();
-    const role = loginRoleSelect.value;
+    const name = loginName.value.trim();
+    const role = loginRole.value;
     if (loginUser(name, role)) {
-      loadAllData(); // refresh users list after potential addition
+      loadData();
       loginContainer.style.display = "none";
       mainApp.style.display = "block";
       renderUI();
     }
   });
+  logoutBtn.addEventListener("click", logout);
+  sendChatBtn.addEventListener("click", sendChatMessage);
+  chatMsgInput.addEventListener("keypress", (e) => {
+    if (e.key === "Enter") sendChatMessage();
+  });
+  document.querySelectorAll(".nav-item").forEach((btn) => {
+    btn.addEventListener("click", () => switchView(btn.dataset.view));
+  });
+  const addMemberBtn = document.getElementById("addMemberBtn");
+  if (addMemberBtn)
+    addMemberBtn.addEventListener("click", () => {
+      const name = document.getElementById("newMemberName").value;
+      const role = document.getElementById("newMemberRole").value;
+      if (addMember(name, role))
+        document.getElementById("newMemberName").value = "";
+    });
 }
-
 bootstrap();
