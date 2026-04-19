@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, user-scalable=yes"
+    />
+    <link rel="stylesheet" href="style.css" />
+    <title>TeamFlow | Project Management Suite</title>
+  </head>
+  <body>
+    <!-- LOGIN SCREEN -->
+    <div id="loginContainer" class="login-container">
+      <div class="login-card">
+        <h2>👋 Welcome to TeamFlow</h2>
+        <input
+          type="text"
+          id="loginName"
+          placeholder="Your full name"
+          autocomplete="off"
+        />
+        <select id="loginRole">
+          <option value="Project Manager">👔 Project Manager (Boss)</option>
+          <option value="Team Member">👩‍💻 Team Member (Employee)</option>
+        </select>
+        <button id="loginBtn">Enter Workspace →</button>
+        <div id="loginError" class="error-msg"></div>
+      </div>
+    </div>
+
+    <!-- MAIN APP (hidden until login) -->
+    <div id="mainApp" style="display: none">
+      <div class="app-wrapper">
+        <!-- Sidebar navigation -->
+        <div class="sidebar">
+          <div class="profile-area">
+            <div class="avatar" id="profileAvatar">👤</div>
+            <h3 id="sidebarUserName">User</h3>
+            <div class="role-badge" id="sidebarUserRole">Role</div>
+          </div>
+          <div class="nav-menu">
+            <button class="nav-item active" data-view="tasks">
+              <span class="nav-icon">📋</span> <span>Tasks</span>
+            </button>
+            <button class="nav-item" data-view="chat">
+              <span class="nav-icon">💬</span> <span>Group Chat</span>
+            </button>
+          </div>
+          <button id="logoutBtnSidebar" class="logout-sidebar">
+            🚪 Logout
+          </button>
+        </div>
+        <!-- Dynamic main content -->
+        <div class="main-content" id="mainContentArea">
+          <!-- Tasks View (dynamic) -->
+          <div id="tasksView">
+            <!-- role-specific content will be injected -->
+          </div>
+          <!-- Chat View (hidden initially) -->
+          <div id="chatView" style="display: none">
+            <div class="card-panel" style="padding: 0; overflow: hidden">
+              <div class="chat-room">
+                <div class="messages-area" id="chatMessagesList"></div>
+                <div class="chat-input">
+                  <input
+                    type="text"
+                    id="chatMsgInput"
+                    placeholder="Write a message..."
+                  />
+                  <button id="sendChatMsgBtn" class="primary">Send</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
