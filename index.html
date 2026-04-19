@@ -4,35 +4,36 @@
     <meta charset="UTF-8" />
     <meta
       name="viewport"
-      content="width=device-width, initial-scale=1.0, user-scalable=yes"
+      content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover"
     />
     <link rel="stylesheet" href="style.css" />
-    <title>TeamFlow | Project Management Suite</title>
+    <title>TeamPulse | Smart Project Hub</title>
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%231e293b' rx='20'/%3E%3Ctext x='50' y='68' font-size='52' text-anchor='middle' fill='%23facc15' font-family='Arial'%3E📊%3C/text%3E%3C/svg%3E"
+    />
   </head>
   <body>
-    <!-- LOGIN SCREEN -->
     <div id="loginContainer" class="login-container">
       <div class="login-card">
-        <h2>👋 Welcome to TeamFlow</h2>
-        <input
-          type="text"
-          id="loginName"
-          placeholder="Your full name"
-          autocomplete="off"
-        />
+        <h2>📊 TeamPulse</h2>
+        <input type="text" id="loginName" placeholder="Full name" />
         <select id="loginRole">
           <option value="Project Manager">👔 Project Manager (Boss)</option>
-          <option value="Team Member">👩‍💻 Team Member (Employee)</option>
+          <option value="Developer">💻 Developer</option>
+          <option value="Designer">🎨 Designer</option>
+          <option value="Content Writer">✍️ Content Writer</option>
+          <option value="HR">🤝 HR</option>
+          <option value="QA">🧪 QA</option>
         </select>
         <button id="loginBtn">Enter Workspace →</button>
         <div id="loginError" class="error-msg"></div>
       </div>
     </div>
 
-    <!-- MAIN APP (hidden until login) -->
     <div id="mainApp" style="display: none">
       <div class="app-wrapper">
-        <!-- Sidebar navigation -->
         <div class="sidebar">
           <div class="profile-area">
             <div class="avatar" id="profileAvatar">👤</div>
@@ -44,39 +45,63 @@
               <span class="nav-icon">📋</span> <span>Tasks</span>
             </button>
             <button class="nav-item" data-view="chat">
-              <span class="nav-icon">💬</span> <span>Group Chat</span>
+              <span class="nav-icon">💬</span> <span>Chat</span>
+            </button>
+            <button
+              class="nav-item"
+              id="teamNavBtn"
+              style="display: none"
+              data-view="team"
+            >
+              <span class="nav-icon">👥</span> <span>Team</span>
             </button>
           </div>
           <button id="logoutBtnSidebar" class="logout-sidebar">
             🚪 Logout
           </button>
         </div>
-        <!-- Dynamic main content -->
-        <div class="main-content" id="mainContentArea">
-          <!-- Tasks View (dynamic) -->
-          <div id="tasksView">
-            <!-- role-specific content will be injected -->
-          </div>
-          <!-- Chat View (hidden initially) -->
+        <div class="main-content">
+          <div id="tasksView"></div>
           <div id="chatView" style="display: none">
-            <div class="card-panel" style="padding: 0; overflow: hidden">
+            <div class="card-panel" style="padding: 0">
               <div class="chat-room">
                 <div class="messages-area" id="chatMessagesList"></div>
                 <div class="chat-input">
                   <input
                     type="text"
                     id="chatMsgInput"
-                    placeholder="Write a message..."
+                    placeholder="Type a message..."
                   />
-                  <button id="sendChatMsgBtn" class="primary">Send</button>
+                  <button id="sendChatBtn" class="primary">Send</button>
                 </div>
               </div>
+            </div>
+          </div>
+          <div id="teamView" style="display: none">
+            <div class="card-panel">
+              <h3>👥 Team Management</h3>
+              <div class="form-grid">
+                <input
+                  type="text"
+                  id="newMemberName"
+                  placeholder="Member name"
+                />
+                <select id="newMemberRole">
+                  <option value="Developer">💻 Developer</option>
+                  <option value="Designer">🎨 Designer</option>
+                  <option value="Content Writer">✍️ Content Writer</option>
+                  <option value="HR">🤝 HR</option>
+                  <option value="QA">🧪 QA</option>
+                  <option value="Project Manager">👔 Project Manager</option>
+                </select>
+                <button id="addMemberBtn" class="primary">➕ Add</button>
+              </div>
+              <div id="memberListContainer" class="member-list"></div>
             </div>
           </div>
         </div>
       </div>
     </div>
-
     <script src="script.js"></script>
   </body>
 </html>
